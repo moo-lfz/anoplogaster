@@ -32,11 +32,7 @@
 // based on Teensy-Synth by Notes and Volts www.notesandvolts.com
 // M_oo 2020
 
-#include <Audio.h>
-#include <Wire.h>
-#include <SPI.h>
-#include <SD.h>
-#include <SerialFlash.h>
+
 
 #include <Audio.h>
 #include <Wire.h>
