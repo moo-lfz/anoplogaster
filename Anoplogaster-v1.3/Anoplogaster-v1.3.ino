@@ -96,6 +96,10 @@ float detuneFactor = 1;
 float bendFactor = 1;
 int bendRange = 12;
 
+const float frequencyTable [128] = {8.176, 8.662, 9.177, 9.723, 10.301, 10.913, 11.562, 12.25, 12.978, 13.75, 14.568, 15.434, 16.352, 17.324, 18.354, 19.445, 20.602, 21.827, 23.125, 24.5, 25.957, 27.5, 29.135, 30.868, 32.703, 34.648, 36.708, 38.891, 41.203, 43.654, 46.249, 48.999, 51.913, 55, 58.27, 61.735, 65.406, 69.296, 73.416, 77.782, 82.407, 87.307, 92.499, 97.999, 103.826, 110, 116.541, 123.471, 130.813, 138.591, 146.832, 155.563, 164.814, 174.614, 184.997, 195.998, 207.652, 220, 233.082, 246.942, 261.626, 277.183, 293.665, 311.127, 329.628, 349.228, 369.994, 391.995, 415.305, 440, 466.164, 493.883, 523.251, 554.365, 587.33, 622.254, 659.255, 698.456, 739.989, 783.991, 830.609, 880, 932.328, 987.767, 1046.502, 1108.731, 1174.659, 1244.508, 1318.51, 1396.913, 1479.978, 1567.982, 1661.219, 1760, 1864.655, 1975.533, 2093.005, 2217.461, 2349.318, 2489.016, 2637.02, 2793.826, 2959.955, 3135.963, 3322.438, 3520, 3729.31, 3951.066, 4186.009, 4434.922, 4698.636, 4978.032, 5274.041, 5587.652, 5919.911, 6271.927, 6644.875, 7040, 7458.62, 7902.133, 8372.018, 8869.844, 9397.273, 9956.063, 10548.08, 11175.3, 11839.82, 12543.85};
+float drumFrequency;
+float drumLength;
+
 unsigned int LFOspeed = 4000;
 float LFOpitch = 1;
 float LFOdepth = 0;
@@ -116,25 +120,26 @@ void setup() {
   usbMIDI.setHandleNoteOn(myNoteOn);
   usbMIDI.setHandlePitchChange(myPitchBend);
 
-  drum1.frequency(60);
-  drum1.length(1500);
+  drum1.frequency(100);
+  drum1.length(50);
   drum1.secondMix(0.0);
   drum1.pitchMod(0.5);
-  
-  drum2.frequency(90);
-  drum2.length(300);
+
+  drum2.frequency(200);
+  drum2.length(60);
   drum2.secondMix(0.0);
   drum2.pitchMod(0.5);
-  
-  drum3.frequency(550);
-  drum3.length(400);
+
+  drum3.frequency(300);
+  drum3.length(40);
   drum3.secondMix(1.0);
   drum3.pitchMod(0.5);
 
   drum4.frequency(350);
-  drum4.length(500);
+  drum4.length(50);
   drum4.secondMix(1.0);
   drum4.pitchMod(0.5);
+
   
   waveform1.begin(WAVEFORM_SAWTOOTH);
   waveform1.amplitude(0.75);
@@ -153,22 +158,22 @@ void setup() {
 
   pink1.amplitude(1.0);
 
-  mixer1.gain(0, 1.0);
-  mixer1.gain(1, 1.0);
-  mixer1.gain(2, 1.0);
-  mixer1.gain(3, 1.0);
+  mixer1.gain(0, 7.0);
+  mixer1.gain(1, 7.0);
+  mixer1.gain(2, 7.0);
+  mixer1.gain(3, 7.0);
 
-  mixer2.gain(0, 1.0);
-  mixer2.gain(1, 1.0);
-  mixer2.gain(2, 1.0);
-  mixer2.gain(3, 1.0);
+  mixer2.gain(0, 7.0);
+  mixer2.gain(1, 7.0);
+  mixer2.gain(2, 7.0);
+  mixer2.gain(3, 7.0);
 
-  mixer3.gain(0, 1.0);
-  mixer3.gain(1, 1.0);
-  mixer3.gain(2, 1.0);
-  mixer3.gain(3, 1.0);
+  mixer3.gain(0, 7.0);
+  mixer3.gain(1, 7.0);
+  mixer3.gain(2, 7.0);
+  mixer3.gain(3, 7.0);
 
-  mixer4.gain(0, 1.0);
+  mixer4.gain(0, 7.0);
   
 
   envelope1.attack(0);
@@ -204,6 +209,45 @@ void myNoteOff(byte channel, byte note, byte velocity) {
     keyBuff(note, false);
   }
 }
+
+void myDrumNoteOn(byte channel, byte note, byte velocity) {
+  if ( note > 23 && note < 108 ) {
+    drumFrequency = frequencyTable [note];
+    drumLength = velocity * 4;
+    playDrum(channel, drumFrequency, drumLength); 
+  }
+}
+
+void playDrum (byte channel, byte drumFrequency, float drumLength) {
+  
+  switch (channel) {
+
+    case 6: //Channel 6 - ORCA 5
+      drum1.frequency(drumFrequency);
+      drum1.length(drumLength);
+      drum1.noteOn();
+      break;
+    
+    case 7: //Channel 7 - ORCA 6
+      drum2.frequency(drumFrequency);
+      drum2.length(drumLength);
+      drum2.noteOn();
+      break;
+    
+    case 8: //Channel 8 - ORCA 7
+      drum3.frequency(drumFrequency);
+      drum3.length(drumLength);
+      drum3.noteOn();
+      break;
+    
+    case 9: //Channel 9 - ORCA 8
+      drum4.frequency(drumFrequency);
+      drum4.length(drumLength);
+      drum4.noteOn();
+      break;
+  }
+}
+
 
 void myPitchBend(byte channel, int bend) {
   float bendF = bend;
@@ -260,10 +304,7 @@ void oscPlay(byte note) {
 
   envelope1.noteOn();
 
-  drum1.noteOn();
-  drum2.noteOn();
-  drum3.noteOn();
-  drum4.noteOn();
+
 }
 
 void oscStop() {
