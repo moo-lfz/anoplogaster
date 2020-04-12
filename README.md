@@ -1,4 +1,5 @@
-This is Anoplogaster a teensy synth use it for livecoding!
+This is Anoplogaster!!! a weirdo teensy synth... use it for livecoding!
+
 Anoplogaster receive midi notes, pitch bend and ccs FROM 64 TO 94
 
 
