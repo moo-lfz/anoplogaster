@@ -27,13 +27,15 @@
 //                 `-:/+ossssssssssddhso/:-.     ``....`                                              
 
 
-// Anoplogaster                                                         
-// a Teensy based synth with no controls just midi cc, pb and notes
+// Anoplogaster
+// a Teensy based synth with no physical controls just midi cc, pb and notes
 // based on Teensy-Synth by Notes and Volts www.notesandvolts.com
-// M_oo 2020 
+// thx to @pangrus for the drum sectionn
+// thx to @paso94 @fedebraita and @audiohacklab for support
+// M_oo 2020
 
 
-
+//#define MACOSX_ADAPTIVE_LIMIT
 #include <Audio.h>
 #include <Wire.h>
 #include <SPI.h>
@@ -41,6 +43,8 @@
 #include <SerialFlash.h>
 
 // GUItool: begin automatically generated code
+//AudioInputI2S            i2s1;           //xy=299,221
+//AudioOutputUSB           usb1;           //xy=705,390
 AudioSynthWaveform       waveform3;      //xy=423,308
 AudioSynthWaveform       waveform2;      //xy=429,248
 AudioSynthSimpleDrum     drum4;          //xy=429,597
@@ -100,7 +104,7 @@ const float frequencyTable [128] = {8.176, 8.662, 9.177, 9.723, 10.301, 10.913, 
 float drumFrequency;
 float drumLength;
 
-unsigned int LFOspeed = 4000;
+unsigned int LFOspeed = 8000;
 float LFOpitch = 1;
 float LFOdepth = 0;
 byte LFOmodeSelect = 0;
@@ -110,7 +114,7 @@ float FILfactor = 1;
 
 
 void setup() {
-  AudioMemory(80);
+  AudioMemory(84);
 
   sgtl5000_1.enable();
   sgtl5000_1.volume(0.75);
@@ -158,26 +162,26 @@ void setup() {
 
   pink1.amplitude(1.0);
 
-  mixer1.gain(0, 7.0);
-  mixer1.gain(1, 7.0);
-  mixer1.gain(2, 7.0);
-  mixer1.gain(3, 7.0);
+  mixer1.gain(0, 0.7);
+  mixer1.gain(1, 0.7);
+  mixer1.gain(2, 0.7);
+  mixer1.gain(3, 0.7);
 
-  mixer2.gain(0, 7.0);
-  mixer2.gain(1, 7.0);
-  mixer2.gain(2, 7.0);
-  mixer2.gain(3, 7.0);
+  mixer2.gain(0, 0.7);
+  mixer2.gain(1, 0.7);
+  mixer2.gain(2, 0.7);
+  mixer2.gain(3, 0.7);
 
-  mixer3.gain(0, 7.0);
-  mixer3.gain(1, 7.0);
-  mixer3.gain(2, 7.0);
-  mixer3.gain(3, 7.0);
+  mixer3.gain(0, 0.7);
+  mixer3.gain(1, 0.7);
+  mixer3.gain(2, 0.7);
+  mixer3.gain(3, 0.7);
 
-  mixer4.gain(0, 7.0);
+  mixer4.gain(0, 0.7);
   
 
-  envelope1.attack(0);
-  envelope1.decay(0);
+  envelope1.attack(50);
+  envelope1.decay(200);
   envelope1.sustain(1);
   envelope1.release(500);
 
@@ -196,11 +200,16 @@ void loop() {
 }
 
 void myNoteOn(byte channel, byte note, byte velocity) {
-  if ( note > 23 && note < 108 ) {
+  if ( channel > 5 && channel < 10 ) {
+    drumFrequency = frequencyTable [note];
+    drumLength = velocity * 4;
+    playDrum(channel, drumFrequency, drumLength); // this the drum note 
+  }
+  else if ( note > 23 && note < 108 ) {
     globalNote = note;
     globalVelocity = velocity;
     keyBuff(note, true);
-    LFOupdate(true, LFOmodeSelect, FILfactor, LFOdepth);
+    LFOupdate(true, LFOmodeSelect, FILfactor, LFOdepth); // this the synth note
   }
 }
 
